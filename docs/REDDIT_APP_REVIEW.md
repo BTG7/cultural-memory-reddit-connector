@@ -2,36 +2,35 @@
 
 ## Link to Source Code or Platform
 
-Use the public repository URL for this project.
+Use the public repository URL for this project:
 
 Suggested field answer:
 
 > This repository documents the read-only Reddit Data API connector used by an
-> external cultural-memory research pipeline. The connector authenticates with
-> OAuth, uses a descriptive User-Agent, collects limited public post metadata
-> from selected subreddits, respects rate limits and deletion requirements, and
-> feeds aggregate research/classification workflows. It does not post, comment,
-> vote, message users, scrape Reddit HTML, train AI models, resell Reddit data,
-> or profile individual users.
+> external cultural-memory research workflow. It authenticates with OAuth, uses
+> a descriptive User-Agent, reads limited public post metadata from selected
+> subreddits, monitors rate-limit headers, and supports deletion/removal
+> handling. It does not post, comment, vote, message users, automate
+> engagement, scrape Reddit HTML, train general-purpose AI models on Reddit
+> content, resell Reddit data, or profile individual users.
 
 ## App Purpose
 
-The app supports research into how public internet culture changes over time,
-specifically whether older viral moments, memes, videos, public figures,
-controversies, jokes, and online trends still remain recognizable, relevant, or
-engaging in modern public discussion.
+The app supports research into how public internet culture changes over time:
+which older viral moments, memes, public media moments, jokes, and online trends
+remain recognizable in public discussion, and which ones fade.
 
-The purpose is to study the cultural half-life of viral content: how quickly
-collective attention fades, which types of moments continue to resonate, and
-how public discussion changes across communities over time.
+The research focuses on aggregate cultural signals such as continued relevance,
+resurfacing trends, sentiment shifts, and nostalgia references across selected
+public communities.
 
 ## Reddit Platform Behavior
 
-The connector periodically reads public post listings and basic metadata from
-selected subreddits related to internet culture, nostalgia, memes, creator
-culture, public media moments, online communities, and trend discussion.
+The connector reads public post listings and basic metadata from selected
+subreddits related to internet culture, nostalgia, memes, creator culture,
+public media moments, online communities, and trend discussion.
 
-At launch, the connector is read-only. It does not:
+The connector is read-only. It does not:
 
 - post
 - comment
@@ -41,8 +40,8 @@ At launch, the connector is read-only. It does not:
 - manipulate rankings
 - interfere with community discussions
 - scrape Reddit HTML
-- collect full comment threads by default
-- store author profile fields by default
+- collect full comment threads
+- store author profile fields
 
 ## Data Collected
 
@@ -56,14 +55,14 @@ Expected stored fields:
 - timestamp
 - public score metadata
 - over-18 flag
-- coarse internal research labels downstream
+- coarse aggregate research labels downstream
 
-The connector excludes author profile fields by default and stores only the
-minimum data needed for aggregate research and auditability.
+The connector omits author profile fields and stores only the minimum public
+post metadata needed for aggregate research and auditability.
 
 ## Compliance Commitments
 
-The implementation is designed around:
+The implementation is built around:
 
 - OAuth authentication
 - descriptive User-Agent
@@ -73,7 +72,7 @@ The implementation is designed around:
 - deletion/removal workflows
 - aggregate research outputs
 
-The project will not use Reddit content to train a general-purpose AI model,
+The project does not use Reddit content to train general-purpose AI models,
 resell Reddit data, profile individual users, infer sensitive personal
 attributes, or build user-level marketing audiences.
 
@@ -87,4 +86,3 @@ This use case is an external, read-only research pipeline for aggregate
 cultural trend analysis. It needs scheduled external ingestion, longitudinal
 storage, cross-platform comparison, audit logging, and downstream analytics in
 an external environment. It does not need a Reddit-native UI.
-

@@ -1,13 +1,16 @@
 # Data Handling
 
-## Principles
+The connector keeps Reddit-derived records small on purpose. It is meant to
+support aggregate cultural-memory research, not account-level analysis.
 
-- Collect the minimum public Reddit metadata needed for aggregate research.
-- Avoid user-level analysis.
-- Do not store author profile fields by default.
-- Do not store full comment threads by default.
-- Remove stored Reddit-derived content when it is deleted or becomes unavailable.
-- Keep audit records minimal after deletion.
+## Defaults
+
+- Store the minimum public post metadata needed for the research question.
+- Do not store author profile fields.
+- Do not collect or store full comment threads.
+- Remove stored Reddit-derived content when the source post is deleted, removed,
+  or unavailable.
+- Keep any deletion audit trail minimal.
 
 ## Default Record
 
@@ -26,13 +29,16 @@
 }
 ```
 
+The record does not include usernames, profile fields, comments, private
+messages, or inferred personal attributes.
+
 ## Removal Workflow
 
 When a Reddit post is deleted, removed, or becomes unavailable:
 
 1. Delete stored title, permalink, URL, and research labels tied to that post.
 2. Keep only a minimal tombstone audit record if needed.
-3. Do not retain disassociated copies of deleted user content.
+3. Do not keep disconnected copies of deleted Reddit content.
 
 Example tombstone:
 

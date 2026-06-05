@@ -9,6 +9,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Callable, Iterable
@@ -20,6 +21,12 @@ from cultural_memory_reddit.records import sanitize_listing_child
 OAUTH_TOKEN_URL = "https://www.reddit.com/api/v1/access_token"
 OAUTH_BASE_URL = "https://oauth.reddit.com"
 DEFAULT_TIMEOUT = 30
+MAX_LISTING_LIMIT = 100
+SUPPORTED_TIME_FILTERS = ("hour", "day", "week", "month", "year", "all")
+
+ENV_CLIENT_ID = "REDDIT_CLIENT_ID"
+ENV_CLIENT_SECRET = "REDDIT_CLIENT_SECRET"
+ENV_USER_AGENT = "REDDIT_USER_AGENT"
 
 HttpGet = Callable[[str, dict[str, str]], tuple[bytes, dict[str, str]]]
 HttpPost = Callable[[str, bytes, dict[str, str]], tuple[bytes, dict[str, str]]]
@@ -53,13 +60,24 @@ class RedditConfig:
 
     @classmethod
     def from_env(cls) -> "RedditConfig":
-        client_id = os.environ.get("REDDIT_CLIENT_ID", "").strip()
-        client_secret = os.environ.get("REDDIT_CLIENT_SECRET", "").strip()
-        user_agent = os.environ.get("REDDIT_USER_AGENT", "").strip()
-        if not client_id or not client_secret or not user_agent:
+        client_id = os.environ.get(ENV_CLIENT_ID, "").strip()
+        client_secret = os.environ.get(ENV_CLIENT_SECRET, "").strip()
+        user_agent = os.environ.get(ENV_USER_AGENT, "").strip()
+        missing = [
+            name
+            for name, value in (
+                (ENV_CLIENT_ID, client_id),
+                (ENV_CLIENT_SECRET, client_secret),
+                (ENV_USER_AGENT, user_agent),
+            )
+            if not value
+        ]
+        if missing:
             raise RedditConnectorError(
-                "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, and "
-                "REDDIT_USER_AGENT are required"
+                "Missing required environment variables: "
+                f"{', '.join(missing)}. Example User-Agent: "
+                "python:cultural-memory-reddit-connector:v0.1.0 "
+                "(by /u/<reddit_username>)"
             )
         return cls(
             client_id=client_id,
@@ -120,6 +138,16 @@ class RedditConnector:
         time_filter: str = "all",
     ) -> list[RedditPost]:
         """Return sanitized public post metadata sorted by score descending."""
+
+        if limit < 1 or limit > MAX_LISTING_LIMIT:
+            raise RedditConnectorError(
+                f"limit must be between 1 and {MAX_LISTING_LIMIT}"
+            )
+        if time_filter not in SUPPORTED_TIME_FILTERS:
+            choices = ", ".join(SUPPORTED_TIME_FILTERS)
+            raise RedditConnectorError(
+                f"time_filter must be one of: {choices}"
+            )
 
         token = self._token()
         headers = {
@@ -186,16 +214,30 @@ class RedditConnector:
 
 def _default_http_get(url: str, headers: dict[str, str]) -> tuple[bytes, dict[str, str]]:
     request = urllib.request.Request(url, headers=headers, method="GET")
-    with urllib.request.urlopen(request, timeout=DEFAULT_TIMEOUT) as response:
-        return response.read(), dict(response.headers.items())
+    try:
+        with urllib.request.urlopen(request, timeout=DEFAULT_TIMEOUT) as response:
+            return response.read(), dict(response.headers.items())
+    except urllib.error.HTTPError as exc:
+        raise RedditConnectorError(
+            f"Reddit API GET failed with HTTP {exc.code}: {url}"
+        ) from exc
+    except (urllib.error.URLError, OSError) as exc:
+        raise RedditConnectorError(f"Reddit API GET failed: {exc}") from exc
 
 
 def _default_http_post(
     url: str, body: bytes, headers: dict[str, str]
 ) -> tuple[bytes, dict[str, str]]:
     request = urllib.request.Request(url, data=body, headers=headers, method="POST")
-    with urllib.request.urlopen(request, timeout=DEFAULT_TIMEOUT) as response:
-        return response.read(), dict(response.headers.items())
+    try:
+        with urllib.request.urlopen(request, timeout=DEFAULT_TIMEOUT) as response:
+            return response.read(), dict(response.headers.items())
+    except urllib.error.HTTPError as exc:
+        raise RedditConnectorError(
+            f"Reddit API POST failed with HTTP {exc.code}: {url}"
+        ) from exc
+    except (urllib.error.URLError, OSError) as exc:
+        raise RedditConnectorError(f"Reddit API POST failed: {exc}") from exc
 
 
 def _decode_json(raw: bytes | str) -> dict[str, Any]:
@@ -220,5 +262,4 @@ def _to_float(value: str | None) -> float | None:
         return float(value)
     except ValueError:
         return None
-
 

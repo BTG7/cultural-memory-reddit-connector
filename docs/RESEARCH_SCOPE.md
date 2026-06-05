@@ -1,6 +1,7 @@
 # Research Scope
 
-This connector supports aggregate research into public internet-culture memory.
+This connector supports aggregate research into public internet-culture memory:
+how public references, jokes, media moments, and trends age over time.
 
 Example research questions:
 
@@ -22,6 +23,5 @@ Example signal categories for downstream analysis:
 - meme_or_format_reference
 - irrelevant
 
-The connector does not classify users. It only supplies limited public post
-metadata to downstream aggregate analysis.
-
+The connector does not classify users. It supplies limited public post metadata
+for aggregate analysis of public cultural signals.

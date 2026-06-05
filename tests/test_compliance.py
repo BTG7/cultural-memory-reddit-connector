@@ -10,7 +10,7 @@ class TestComplianceHelpers(unittest.TestCase):
         policy = RetentionPolicy()
         self.assertEqual(policy.delete_unavailable_content_within_hours, 48)
         self.assertFalse(policy.store_author_fields)
-        self.assertFalse(policy.store_full_comment_threads_by_default)
+        self.assertFalse(policy.collect_full_comment_threads)
         self.assertFalse(policy.train_general_purpose_ai_models)
         self.assertFalse(policy.resell_reddit_data)
         self.assertFalse(policy.build_user_level_marketing_audiences)
@@ -25,4 +25,3 @@ class TestComplianceHelpers(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

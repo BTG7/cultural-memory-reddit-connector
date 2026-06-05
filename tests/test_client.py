@@ -16,7 +16,10 @@ from cultural_memory_reddit.client import (
 class TestRedditConfig(unittest.TestCase):
     def test_requires_oauth_and_user_agent(self) -> None:
         with patch.dict(os.environ, {}, clear=True):
-            with self.assertRaises(RedditConnectorError):
+            with self.assertRaisesRegex(
+                RedditConnectorError,
+                "Missing required environment variables: REDDIT_CLIENT_ID",
+            ):
                 RedditConfig.from_env()
 
     def test_loads_from_environment(self) -> None:
@@ -105,6 +108,16 @@ class TestRedditConnector(unittest.TestCase):
         self.assertIsNotNone(connector.last_rate_limit)
         assert connector.last_rate_limit is not None
         self.assertEqual(connector.last_rate_limit.remaining, 99)
+
+    def test_validates_listing_options_before_network_access(self) -> None:
+        connector = RedditConnector(
+            RedditConfig("cid", "secret", "python:test:v1 (by /u/example)")
+        )
+
+        with self.assertRaisesRegex(RedditConnectorError, "limit must be between"):
+            connector.top_posts(["youtubehaiku"], limit=0)
+        with self.assertRaisesRegex(RedditConnectorError, "time_filter must be one of"):
+            connector.top_posts(["youtubehaiku"], time_filter="forever")
 
     def test_rejects_bad_oauth_response(self) -> None:
         def fake_post(url: str, body: bytes, headers: dict[str, str]):
