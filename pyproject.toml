@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cultural-memory-reddit-connector"
+version = "0.1.0"
+description = "Read-only Reddit Data API connector for public internet-culture research."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Ben Sullivan" }]
+keywords = ["reddit", "research", "culture", "oauth", "data-api"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+]
+
+[project.scripts]
+cultural-memory-reddit = "cultural_memory_reddit.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
